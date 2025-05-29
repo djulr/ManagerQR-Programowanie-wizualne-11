@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
 using System.Windows.Forms;
 using QRCoder;
@@ -32,6 +33,8 @@ namespace pw11
         private Button btnClear = new Button();
         private Button btnQR = new Button();
         private DataGridView dataGridView = new DataGridView();
+
+        private Bitmap lastLabelToPrint = null;
 
         private string dbPath = "Data Source=samples.db";
 
@@ -292,7 +295,8 @@ namespace pw11
                     string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
                     labelImage.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
 
-                    ShowLabelPreview(new Bitmap(labelImage), fileName);
+                    lastLabelToPrint = new Bitmap(labelImage);
+                    ShowLabelPreview(lastLabelToPrint, fileName);
                 }
             }
         }
@@ -320,15 +324,55 @@ namespace pw11
                 Dock = DockStyle.Fill
             };
 
+            Button btnPrint = new Button
+            {
+                Text = "Drukuj",
+                Dock = DockStyle.Bottom,
+                Height = 40
+            };
+            btnPrint.Click += (s, e) => PrintLabel();
+
             scrollPanel.Controls.Add(pictureBox);
             previewForm.Controls.Add(scrollPanel);
+            previewForm.Controls.Add(btnPrint);
 
             previewForm.ClientSize = new Size(
                 Math.Min(labelImage.Width + 20, 800),
-                Math.Min(labelImage.Height + 60, 600)
+                Math.Min(labelImage.Height + 100, 600)
             );
 
             previewForm.ShowDialog();
+        }
+
+        private void PrintLabel()
+        {
+            if (lastLabelToPrint == null)
+            {
+                MessageBox.Show("Brak etykiety do wydruku.");
+                return;
+            }
+
+            PrintDocument printDoc = new PrintDocument();
+            printDoc.PrintPage += (s, e) =>
+            {
+                e.Graphics.DrawImage(lastLabelToPrint, new Point(0, 0));
+            };
+
+            using (PrintDialog dlg = new PrintDialog())
+            {
+                dlg.Document = printDoc;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        printDoc.Print();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("B³¹d podczas drukowania: " + ex.Message);
+                    }
+                }
+            }
         }
     }
 }
