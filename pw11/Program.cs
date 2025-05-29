@@ -49,49 +49,52 @@ namespace pw11
         private void InitUI()
         {
             Label lblId = new Label() { Text = "ID:", Left = 10, Top = 10, Width = 100 };
-            txtId.SetBounds(120, 10, 200, 20);
+            txtId.SetBounds(120, 10, 200, 25);
 
-            Label lblName = new Label() { Text = "Nazwa:", Left = 10, Top = 40, Width = 100 };
-            txtName.SetBounds(120, 40, 200, 20);
+            Label lblName = new Label() { Text = "Nazwa:", Left = 10, Top = 45, Width = 100 };
+            txtName.SetBounds(120, 45, 200, 25);
 
-            Label lblType = new Label() { Text = "Typ:", Left = 10, Top = 70, Width = 100 };
-            comboType.SetBounds(120, 70, 200, 20);
+            Label lblType = new Label() { Text = "Typ:", Left = 10, Top = 80, Width = 100 };
+            comboType.SetBounds(120, 80, 200, 25);
             comboType.Items.AddRange(new string[] { "DNA", "RNA", "Bia³ko", "Inny" });
 
-            Label lblDate = new Label() { Text = "Data pobrania:", Left = 10, Top = 100, Width = 100 };
-            datePicker.SetBounds(120, 100, 200, 20);
+            Label lblDate = new Label() { Text = "Data pobrania:", Left = 10, Top = 115, Width = 100 };
+            datePicker.SetBounds(120, 115, 200, 25);
 
-            Label lblNotes = new Label() { Text = "Uwagi:", Left = 10, Top = 130, Width = 100 };
-            txtNotes.SetBounds(120, 130, 200, 60);
+            Label lblNotes = new Label() { Text = "Uwagi:", Left = 10, Top = 150, Width = 100 };
+            txtNotes.SetBounds(120, 150, 200, 60);
             txtNotes.Multiline = true;
 
             btnAdd.Text = "Dodaj";
-            btnAdd.SetBounds(10, 200, 95, 30);
+            btnAdd.SetBounds(10, 225, 95, 35);
             btnAdd.Click += BtnAdd_Click;
 
             btnUpdate.Text = "Zapisz zmiany";
-            btnUpdate.SetBounds(110, 200, 110, 30);
+            btnUpdate.SetBounds(110, 225, 110, 35);
             btnUpdate.Click += BtnUpdate_Click;
 
             btnDelete.Text = "Usuñ";
-            btnDelete.SetBounds(225, 200, 95, 30);
+            btnDelete.SetBounds(225, 225, 95, 35);
             btnDelete.Click += BtnDelete_Click;
 
             btnClear.Text = "Wyczyœæ";
-            btnClear.SetBounds(325, 200, 95, 30);
+            btnClear.SetBounds(325, 225, 95, 35);
             btnClear.Click += BtnClear_Click;
 
             btnQR.Text = "Generuj QR";
-            btnQR.SetBounds(425, 200, 110, 30);
+            btnQR.SetBounds(425, 225, 110, 35);
             btnQR.Click += BtnQR_Click;
 
+            // ?? Stylizacja przycisków – nowoczeœnie i g³adko
             foreach (var btn in new[] { btnAdd, btnUpdate, btnDelete, btnClear, btnQR })
             {
-                btn.FlatStyle = FlatStyle.System;
+                btn.FlatStyle = FlatStyle.Standard;
+                btn.UseVisualStyleBackColor = true;
+                btn.BackColor = SystemColors.Control;
                 btn.Font = new Font("Segoe UI", 10, FontStyle.Regular);
             }
 
-            dataGridView.SetBounds(10, 250, 760, 300);
+            dataGridView.SetBounds(10, 280, 760, 280);
             dataGridView.ReadOnly = true;
             dataGridView.AllowUserToAddRows = false;
             dataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
