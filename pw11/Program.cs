@@ -84,8 +84,8 @@ namespace pw11
             btnClear.SetBounds(325, 225, 95, 35);
             btnClear.Click += BtnClear_Click;
 
-            btnQR.Text = "Generuj QR";
-            btnQR.SetBounds(425, 225, 110, 35);
+            btnQR.Text = "Generuj QR i etykietê";
+            btnQR.SetBounds(425, 225, 200, 35);
             btnQR.Click += BtnQR_Click;
 
             foreach (var btn in new[] { btnAdd, btnUpdate, btnDelete, btnClear, btnQR })
