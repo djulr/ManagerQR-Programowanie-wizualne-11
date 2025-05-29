@@ -85,7 +85,6 @@ namespace pw11
             btnQR.SetBounds(425, 225, 110, 35);
             btnQR.Click += BtnQR_Click;
 
-            // ?? Stylizacja przycisków – nowoczeœnie i g³adko
             foreach (var btn in new[] { btnAdd, btnUpdate, btnDelete, btnClear, btnQR })
             {
                 btn.FlatStyle = FlatStyle.Standard;
@@ -271,12 +270,65 @@ namespace pw11
             using (QRCode qrCode = new QRCode(qrCodeData))
             using (Bitmap qrImage = qrCode.GetGraphic(20))
             {
-                string fileName = $"QR_{txtId.Text}.png";
-                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
-                qrImage.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+                int labelHeight = 40;
+                int totalWidth = qrImage.Width;
+                int totalHeight = qrImage.Height + labelHeight;
 
-                MessageBox.Show($"Zapisano kod QR jako:\n{fileName}");
+                using (Bitmap labelImage = new Bitmap(totalWidth, totalHeight))
+                using (Graphics g = Graphics.FromImage(labelImage))
+                {
+                    g.Clear(Color.White);
+                    g.DrawImage(qrImage, new Point(0, 0));
+
+                    using (Font font = new Font("Segoe UI", 12))
+                    using (Brush brush = new SolidBrush(Color.Black))
+                    using (StringFormat format = new StringFormat() { Alignment = StringAlignment.Center })
+                    {
+                        RectangleF rect = new RectangleF(0, qrImage.Height, totalWidth, labelHeight);
+                        g.DrawString(txtName.Text, font, brush, rect, format);
+                    }
+
+                    string fileName = $"Label_{txtId.Text}.png";
+                    string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+                    labelImage.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                    ShowLabelPreview(new Bitmap(labelImage), fileName);
+                }
             }
+        }
+
+        private void ShowLabelPreview(Bitmap labelImage, string title)
+        {
+            Form previewForm = new Form
+            {
+                Text = "Podgl¹d etykiety: " + title,
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.Sizable,
+                AutoScroll = true,
+                MinimumSize = new Size(400, 400)
+            };
+
+            PictureBox pictureBox = new PictureBox
+            {
+                Image = labelImage,
+                SizeMode = PictureBoxSizeMode.AutoSize
+            };
+
+            Panel scrollPanel = new Panel
+            {
+                AutoScroll = true,
+                Dock = DockStyle.Fill
+            };
+
+            scrollPanel.Controls.Add(pictureBox);
+            previewForm.Controls.Add(scrollPanel);
+
+            previewForm.ClientSize = new Size(
+                Math.Min(labelImage.Width + 20, 800),
+                Math.Min(labelImage.Height + 60, 600)
+            );
+
+            previewForm.ShowDialog();
         }
     }
 }
