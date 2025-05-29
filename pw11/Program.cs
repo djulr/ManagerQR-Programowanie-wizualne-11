@@ -2,7 +2,9 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
+using QRCoder;
 
 namespace pw11
 {
@@ -28,6 +30,7 @@ namespace pw11
         private Button btnUpdate = new Button();
         private Button btnDelete = new Button();
         private Button btnClear = new Button();
+        private Button btnQR = new Button();
         private DataGridView dataGridView = new DataGridView();
 
         private string dbPath = "Data Source=samples.db";
@@ -36,6 +39,8 @@ namespace pw11
         {
             this.Text = "Biobaza - Próbki biologiczne";
             this.Size = new Size(800, 600);
+            this.DoubleBuffered = true;
+            this.Font = new Font("Segoe UI", 10, FontStyle.Regular);
             InitUI();
             InitializeDatabase();
             LoadSamples();
@@ -76,6 +81,16 @@ namespace pw11
             btnClear.SetBounds(325, 200, 95, 30);
             btnClear.Click += BtnClear_Click;
 
+            btnQR.Text = "Generuj QR";
+            btnQR.SetBounds(425, 200, 110, 30);
+            btnQR.Click += BtnQR_Click;
+
+            foreach (var btn in new[] { btnAdd, btnUpdate, btnDelete, btnClear, btnQR })
+            {
+                btn.FlatStyle = FlatStyle.System;
+                btn.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            }
+
             dataGridView.SetBounds(10, 250, 760, 300);
             dataGridView.ReadOnly = true;
             dataGridView.AllowUserToAddRows = false;
@@ -86,7 +101,7 @@ namespace pw11
                 lblId, txtId, lblName, txtName,
                 lblType, comboType, lblDate, datePicker,
                 lblNotes, txtNotes,
-                btnAdd, btnUpdate, btnDelete, btnClear,
+                btnAdd, btnUpdate, btnDelete, btnClear, btnQR,
                 dataGridView
             });
         }
@@ -235,6 +250,29 @@ namespace pw11
                 datePicker.Value = DateTime.Parse(row.Cells["Date"].Value.ToString());
                 txtNotes.Text = row.Cells["Notes"].Value.ToString();
                 txtId.Enabled = false;
+            }
+        }
+
+        private void BtnQR_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtId.Text))
+            {
+                MessageBox.Show("Najpierw wybierz lub dodaj próbkê.");
+                return;
+            }
+
+            string qrContent = $"ID: {txtId.Text}\nNazwa: {txtName.Text}\nTyp: {comboType.Text}\nData: {datePicker.Value:yyyy-MM-dd}\nUwagi: {txtNotes.Text}";
+
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(qrContent, QRCodeGenerator.ECCLevel.Q))
+            using (QRCode qrCode = new QRCode(qrCodeData))
+            using (Bitmap qrImage = qrCode.GetGraphic(20))
+            {
+                string fileName = $"QR_{txtId.Text}.png";
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+                qrImage.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                MessageBox.Show($"Zapisano kod QR jako:\n{fileName}");
             }
         }
     }
