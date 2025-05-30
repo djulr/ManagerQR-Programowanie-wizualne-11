@@ -88,6 +88,14 @@ namespace pw11
             btnQR.SetBounds(425, 225, 200, 35);
             btnQR.Click += BtnQR_Click;
 
+            Label lblSearch = new Label() { Text = "Szukaj:", Left = 450, Top = 10, Width = 60 };
+            TextBox txtSearch = new TextBox() { Name = "txtSearch", Left = 510, Top = 10, Width = 180 };
+            Button btnSearch = new Button() { Text = "Szukaj", Left = 700, Top = 10, Width = 70 };
+
+            btnSearch.Click += BtnSearch_Click;
+
+            this.Controls.AddRange(new Control[] { lblSearch, txtSearch, btnSearch });
+
             foreach (var btn in new[] { btnAdd, btnUpdate, btnDelete, btnClear, btnQR })
             {
                 btn.FlatStyle = FlatStyle.Standard;
@@ -128,15 +136,28 @@ namespace pw11
             }
         }
 
-        private void LoadSamples()
+        private void LoadSamples(string filter = "")
         {
             using (var conn = new SQLiteConnection(dbPath))
             {
                 conn.Open();
-                var adapter = new SQLiteDataAdapter("SELECT * FROM Samples", conn);
-                var table = new DataTable();
-                adapter.Fill(table);
-                dataGridView.DataSource = table;
+                string sql = "SELECT * FROM Samples";
+
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    sql += " WHERE Id LIKE @filter OR Name LIKE @filter OR Type LIKE @filter OR Date LIKE @filter OR Notes LIKE @filter";
+                }
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    if (!string.IsNullOrWhiteSpace(filter))
+                        cmd.Parameters.AddWithValue("@filter", "%" + filter + "%");
+
+                    var adapter = new SQLiteDataAdapter(cmd);
+                    var table = new DataTable();
+                    adapter.Fill(table);
+                    dataGridView.DataSource = table;
+                }
             }
         }
 
@@ -164,6 +185,16 @@ namespace pw11
                 {
                     MessageBox.Show("B³¹d: " + ex.Message);
                 }
+            }
+        }
+
+        private void BtnSearch_Click(object sender, EventArgs e)
+        {
+            var searchText = Controls["txtSearch"] as TextBox;
+            if (searchText != null)
+            {
+                string filter = searchText.Text.Trim();
+                LoadSamples(filter);
             }
         }
 
